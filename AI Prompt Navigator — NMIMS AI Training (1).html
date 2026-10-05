@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AI Prompt Navigator — NMIMS AI Training</title>
+<style>
+:root{--red:#C4161C;--ink:#161618;--mut:#5b5b62;--line:#e3e3e6;--bg:#fff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:18px/1.55 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+header{border-bottom:4px solid var(--red);padding:20px 5vw 14px}
+h1{margin:0;font-size:clamp(22px,4vw,32px)}h1 span{color:var(--red)}
+nav{display:flex;gap:6px;padding:12px 5vw 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+nav button{font:600 17px inherit;font-family:inherit;border:0;background:none;padding:12px 18px;cursor:pointer;border-bottom:4px solid transparent;color:var(--mut)}
+nav button.on{color:var(--ink);border-color:var(--red)}
+main{padding:20px 5vw 60px;max-width:1100px;margin:auto}
+.tab{display:none}.tab.on{display:block}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.chip{font:inherit;font-size:16px;border:2px solid var(--ink);background:#fff;color:var(--ink);border-radius:99px;padding:6px 16px;cursor:pointer}
+.chip.on{background:var(--ink);color:#fff}
+input,textarea,select{font:inherit;font-size:17px;border:2px solid var(--line);border-radius:8px;padding:9px 12px;width:100%;color:var(--ink);background:#fff}
+input:focus,textarea:focus,select:focus{outline:3px solid #C4161C55;border-color:var(--red)}
+.card{border:1px solid var(--line);border-left:6px solid var(--red);border-radius:10px;padding:18px;margin-bottom:18px}
+.card h3{margin:0 0 8px;font-size:21px}
+.badge,.tag{display:inline-block;font-size:14px;font-weight:700;border-radius:6px;padding:2px 10px;margin:0 6px 6px 0}
+.badge{background:var(--ink);color:#fff}
+.G{background:#dcf5e3;color:#0b5a25}.A{background:#fff0c7;color:#7a4b00}.R{background:#fde0e1;color:#9b0f14}
+.why{color:var(--mut);margin:4px 0 10px;font-size:16px}
+.pt{background:#f7f7f8;border-radius:8px;padding:14px;font-size:16.5px;line-height:2.1;white-space:pre-wrap}
+.pt input{display:inline-block;width:auto;min-width:90px;font-size:15px;padding:1px 8px;border:2px solid var(--red);border-radius:6px;background:#fff;line-height:1.4}
+.btn{font:700 17px inherit;font-family:inherit;background:var(--red);color:#fff;border:0;border-radius:8px;padding:11px 22px;cursor:pointer;text-decoration:none;display:inline-block}
+.btn.k{background:var(--ink)}.btn:hover{opacity:.88}
+label{display:block;font-weight:700;margin:14px 0 4px}
+.warn{background:#fde0e1;border-left:6px solid var(--red);padding:10px 14px;border-radius:6px;font-weight:700;margin-bottom:6px}
+#pv{background:#f7f7f8;border-radius:8px;padding:14px;white-space:pre-wrap;min-height:90px;margin:8px 0 14px}
+.hint{color:var(--mut);font-size:16px}
+#toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 22px;border-radius:99px;opacity:0;transition:.25s;pointer-events:none}
+#toast.s{opacity:1}
+.mon{background:#fff5f5;border:2px solid var(--red);border-radius:10px;padding:16px;margin-bottom:18px}
+.mon label{margin:0 0 6px;font-size:20px}
+#sug{display:none;margin-top:10px;font-weight:700}
+.card.hit{background:#fff8f8;box-shadow:0 0 0 3px #C4161C44}
+.card.hit::before{content:"★ Best match";display:block;color:var(--red);font-weight:700;font-size:15px;margin-bottom:4px}
+.g2{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px}
+</style></head><body>
+<header><h1>AI Prompt Navigator <span>—</span> NMIMS AI Training</h1></header>
+<nav id="nav"><button class="on" data-t="t1">Find a Prompt</button><button data-t="t2">Build a Prompt</button><button data-t="t3">Generate with AI</button></nav>
+<main>
+<section class="tab on" id="t1"><div class="mon"><label for="mon">What do you need to do on Monday?</label><input id="mon" placeholder="e.g. summarise my email thread, check citations, write minutes…"><div id="sug"></div></div><div class="row" id="rf"></div><input id="q" placeholder="Search prompts…" style="margin-bottom:18px"><div id="list"></div></section>
+<section class="tab" id="t2"><div class="warn">Never enter names or real student data.</div>
+<label>Who are you</label><input id="b0" placeholder="e.g. a Dean at a business school">
+<label>Task</label><textarea id="b1" rows="2" placeholder="What should the AI do?"></textarea>
+<label>Context</label><textarea id="b2" rows="2" placeholder="Dates, programme, background (no names)"></textarea>
+<label>Output format</label><textarea id="b3" rows="2" placeholder="e.g. a table with columns…"></textarea>
+<label>Rules</label><textarea id="b4" rows="2" placeholder="e.g. Do not invent facts; mark gaps as 'not specified'"></textarea>
+<label>Tool</label><select id="tool"><option>ChatGPT</option><option>Claude</option><option>Copilot</option><option>Perplexity</option></select>
+<p class="hint" id="th"></p>
+<label>Live preview</label><div id="pv"></div><button class="btn" id="cb">Copy prompt</button></section>
+<section class="tab" id="t3"><div class="warn">Never enter names or real student data.</div>
+<label>Describe your task in plain words</label><textarea id="g" rows="5" placeholder="e.g. I need to summarise a long committee report into a one-page brief"></textarea>
+<div class="g2"><a class="btn" id="gc" target="_blank" rel="noopener">Open in ChatGPT</a><a class="btn k" id="gp" target="_blank" rel="noopener">Open in Perplexity</a></div>
+<p class="hint">Claude can't be pre-filled: copy the text, then paste it into a new Claude chat.</p>
+<div class="g2"><button class="btn" id="gcl">Copy for Claude</button><a class="btn k" href="https://claude.ai/new" target="_blank" rel="noopener">Open Claude</a></div></section>
+</main><div id="toast">Copied</div>
+<script>
+const SF={G:"Green: safe with real data",A:"Amber: anonymised data only",R:"Red: synthetic data only"};
+const D=[
+["Define a focused research question","Researcher","Perplexity","Perplexity grounds its answers in live web sources, which helps you scope a topic against what is actually published.","G",`I am preparing an academic literature review. Help me define a focused research question on [TOPIC]. Give me: 1. One primary research question 2. Three key constructs or variables 3. Inclusion criteria for relevant papers 4. Exclusion criteria for irrelevant papers. Do not invent evidence or provide unsupported conclusions.`],
+["Find peer-reviewed papers","Researcher","Perplexity","Perplexity returns linked sources for every claim, so each paper can be checked quickly.","G",`Find 10 peer-reviewed journal articles published from 2020 to 2026 on [TOPIC]. Prioritise studies involving [CONTEXT]. For every paper, provide: title, authors, year, journal, DOI or publisher link, country or research context, and a one-sentence description. Do not invent citations. If a detail cannot be confirmed, write 'not verified.'`],
+["Check citations in a draft","Researcher,Dean","Claude","Claude can read a long manuscript in one pass and apply a citation-checking skill consistently.","A",`I am a researcher finalising a manuscript. Use the citation-checker skill to check the citations in my attached draft. Context: citation style is [APA 7 / OTHER] and the target journal is [JOURNAL]. Output a table with: in-text citation, matching reference entry, issue found (missing, mismatched year, incomplete, format error), and suggested fix. Then list references never cited in the text. Do not invent or correct details from memory; mark anything you cannot verify as 'not verified.'`],
+["Turn a circular into an action plan","Deputy Registrar,Assistant Registrar,Provost","Claude","Claude handles long official documents well and a skill keeps the action-plan format the same every time.","G",`I am a [ROLE] at [UNIVERSITY]. Use the circular-to-action skill to turn the attached circular into an action plan. Context: the issuing authority is [AUTHORITY] and the compliance deadline is [DATE]. Output a table with: action, responsible office, deadline, evidence needed, and priority (High/Medium/Low), followed by three points needing clarification. Rule: use only what the circular states; mark anything unclear as 'not specified.'`],
+["Summarise a long email thread and who is waiting on me","Provost,Dean,Deputy Registrar","Copilot","Copilot works inside your Outlook mailbox, so it reads the thread directly without copying and pasting.","G",`I am a [ROLE]. Summarise the email thread titled [SUBJECT] with [PERSON]. Context: I need to decide next steps before [DATE]. Output: 1. A summary in five bullets 2. Decisions already made 3. A table of people waiting on me: name, what they need, date asked, urgency 4. A suggested reply order. Rule: base everything on the emails only; do not assume anything that is not written.`],
+["Build my weekly task list from email and calendar","Provost,Dean,Deputy Registrar,Assistant Registrar","Copilot","Copilot can see both your Outlook email and calendar, so one prompt can combine them.","G",`I am a [ROLE]. Build my task list for the week of [DATE] from my emails and calendar. Context: my priorities this week are [PRIORITIES], and I have [NUMBER] free hours for focus work. Output a table grouped by day: task, source (email or meeting), deadline, estimated time, priority. End with three tasks I could delegate or decline. Rule: include only tasks found in my emails and calendar; do not invent commitments.`],
+["Compare a new regulation with our ordinance","Deputy Registrar,Assistant Registrar","Copilot","Copilot can open both documents from your OneDrive or SharePoint and compare them side by side.","G",`I am a [ROLE] responsible for regulatory compliance. Compare the attached regulation, [REGULATION NAME], with our ordinance, [ORDINANCE NAME]. Context: the regulation took effect on [DATE]. Output a table with: topic, regulation requirement, our ordinance clause, status (Aligned / Partial / Conflict / Missing), and suggested amendment. Rule: cite clause numbers in every row; do not infer provisions that are not in the documents.`],
+["Schedule a weekly research alert on a topic","Researcher,Dean","ChatGPT","ChatGPT scheduled tasks can run a web search automatically every week and deliver the results to you.","G",`I am a [ROLE] working on [FIELD]. Set up a scheduled task that runs every Monday at [TIME] IST. Task: search for new peer-reviewed papers, preprints and reports on [TOPIC] published in the past 7 days. Context: I focus on [CONTEXT]. Output: up to 5 items with title, authors, source, link and a two-sentence summary, plus one line on why each matters to me. Rule: include only items with working links; if none are found, say so; never invent citations.`],
+["Track updates from a specific website weekly","Assistant Registrar,Deputy Registrar","ChatGPT","ChatGPT scheduled tasks can revisit a page on a set day and report only what has changed.","G",`I am a [ROLE]. Set up a scheduled task that runs every [DAY] at [TIME] IST to check [WEBSITE URL] for updates. Context: I need to track [WHAT TO TRACK, e.g. notices, circulars, deadlines]. Output: a short list of new or changed items since last week with title, date, link and a one-line summary, marked 'Action needed' where a deadline applies. Rule: report only what appears on the page; if nothing changed, say 'No updates.' Do not guess.`],
+["Format rough meeting notes into formal minutes","Assistant Registrar,Deputy Registrar","ChatGPT","ChatGPT is fast at turning messy notes into clean, formal writing in a set structure.","A",`I am a [ROLE] and secretary of [COMMITTEE]. Format my rough notes below into formal minutes. Context: the meeting was held on [DATE] at [VENUE]; attendees are [NAMES OR ROLES]; the chair is [CHAIR]. Output: header, attendance, agenda items with discussion summary, decisions, an action table (action, owner, deadline), and date of next meeting. Use formal, neutral language. Rule: do not add decisions, names or dates that are not in my notes; mark gaps as [TO CONFIRM].`],
+["Triage a set of student grievances","Dean,Deputy Registrar","Claude","Claude can read many long, emotional submissions and sort them carefully without losing detail.","R",`I am a [ROLE] handling student grievances. Triage the grievances below. Context: our grievance policy categories are [CATEGORIES]; the response deadline is [NUMBER] working days. Output a table: grievance ID, category, severity (Urgent/High/Normal), office responsible, suggested first response, escalation needed (Yes/No). Then list recurring patterns. Rule: use only the text provided; do not assume facts or judge the student's credibility.`],
+["Map exam questions to course learning outcomes for AoL","Dean","Claude","Claude can reason across a whole question paper and a list of outcomes and explain each mapping.","A",`I am a [ROLE] preparing Assurance of Learning reports. Map the exam questions below to the course learning outcomes. Context: the course is [COURSE CODE AND NAME]; the outcomes are [CLO LIST]; marks per question are given. Output a table: question number, marks, mapped CLO, Bloom's level, confidence (High/Medium/Low), then total marks per CLO and any CLO with weak or no coverage. Rule: base the mapping on question wording only; flag ambiguous questions instead of forcing a match.`],
+["Draft a letter to the parent of an at-risk student","Dean,Assistant Registrar","ChatGPT","ChatGPT writes warm, well-toned formal letters quickly and adjusts the tone on request.","A",`I am a [ROLE] at [UNIVERSITY]. Draft a letter to the parent or guardian of an at-risk student. Context: the concern is [ATTENDANCE / MARKS / CONDUCT, WITH FIGURES]; support available includes [SUPPORT SERVICES]; a reply is needed by [DATE]. Output: a one-page formal letter in a warm, respectful tone with a clear request, a meeting offer and contact details [CONTACT]. Rule: use only the facts I provide; do not diagnose causes or blame the student.`],
+["Build a performance dashboard from attendance and marks files","Dean,Provost","Claude","Claude can read spreadsheets, run the calculations and build a working dashboard page in one conversation.","A",`I am a [ROLE]. Build a performance dashboard from the attached attendance and marks files. Context: the programme is [PROGRAMME], the term is [TERM]; the attendance threshold is [NUMBER]% and the pass mark is [NUMBER]. Output: a single-page HTML dashboard with summary cards, an attendance versus marks chart, a list of students below threshold, and a section-wise comparison. Rule: calculate only from the files; show how each figure is derived and list missing or mismatched records instead of filling gaps.`],
+["Draft an NAAC evidence narrative from documents","Dean,Provost,Deputy Registrar","Claude","Claude can work across many long source documents and keep each claim tied to its evidence.","A",`I am a [ROLE] preparing our NAAC self-study report. Draft an evidence narrative for [CRITERION AND KEY INDICATOR] from the attached documents. Context: the assessment cycle is [YEAR] and our institution is [UNIVERSITY]. Output: a narrative of up to [NUMBER] words, then an evidence table with claim, supporting document, page or section, and a list of missing evidence. Rule: state only what the documents support; do not invent figures, and mark gaps as 'evidence needed.'`]
+];
+const $=s=>document.querySelector(s),T=$("#toast");
+function copy(t){const d=()=>{T.classList.add("s");setTimeout(()=>T.classList.remove("s"),1300)};
+ if(navigator.clipboard)navigator.clipboard.writeText(t).then(d,fb);else fb();
+ function fb(){const a=document.createElement("textarea");a.value=t;document.body.appendChild(a);a.select();try{document.execCommand("copy")}catch(e){}a.remove();d()}}
+document.querySelectorAll("#nav button").forEach(b=>b.onclick=()=>{document.querySelectorAll("#nav button,.tab").forEach(e=>e.classList.remove("on"));b.classList.add("on");$("#"+b.dataset.t).classList.add("on")});
+const roles=["All","Researcher","Dean","Provost","Deputy Registrar","Assistant Registrar"];let role="All";
+const cards=D.map(([task,r,tool,why,s,p])=>{
+ const parts=p.split(/(\[[^\]]+\])/),vals=parts.map(x=>x),el=document.createElement("div");el.className="card";
+ const h=document.createElement("h3");h.textContent=task;
+ const b=document.createElement("span");b.className="badge";b.textContent=tool;
+ const t=document.createElement("span");t.className="tag "+s;t.textContent=SF[s];
+ const w=document.createElement("div");w.className="why";w.textContent=why;
+ const pt=document.createElement("div");pt.className="pt";
+ parts.forEach((x,i)=>{if(/^\[.*\]$/.test(x)){const n=document.createElement("input");n.placeholder=x.slice(1,-1);n.size=Math.max(8,x.length-2);n.oninput=()=>{vals[i]=n.value||x};pt.appendChild(n)}else pt.appendChild(document.createTextNode(x))});
+ const c=document.createElement("button");c.className="btn";c.textContent="Copy";c.style.marginTop="12px";c.onclick=()=>copy(vals.join(""));
+ el.append(h,b,t,w,pt,c);
+ return{el,tool,why,sc:0,hit:0,tk:task.toLowerCase(),r:r.split(","),txt:(task+" "+tool+" "+why+" "+p).toLowerCase()}});
+const L=$("#list");
+function show(){const q=$("#q").value.toLowerCase().trim();L.replaceChildren();let n=0;
+ cards.filter(c=>(role=="All"||c.r.includes(role))&&c.txt.includes(q)).sort((a,b)=>b.sc-a.sc).forEach(c=>{L.appendChild(c.el);n++});
+ if(!n)L.innerHTML='<p class="hint">No prompts match.</p>'}
+const SW=new Set("what need want have with that this from for the and into about how can who our are you your my all out get then some any".split(" "));
+function mon(){const w=$("#mon").value.toLowerCase().split(/\W+/).filter(x=>x.length>2&&!SW.has(x)).map(x=>x.slice(0,5)),s=$("#sug");
+ cards.forEach(c=>{c.sc=w.reduce((a,x)=>a+(c.tk.includes(x)?3:0)+(c.txt.includes(x)?1:0),0);c.hit=0});
+ const top=[...cards].sort((a,b)=>b.sc-a.sc),m=top[0];
+ if(!w.length)s.style.display="none";
+ else{s.style.display="block";
+  if(m.sc<2)s.textContent="No close match. Try different words, or use the Build a Prompt tab.";
+  else{top.filter(c=>c.sc>=Math.max(2,m.sc*.6)).slice(0,3).forEach(c=>c.hit=1);s.textContent="Suggested tool: "+m.tool+" — "+m.why}}
+ cards.forEach(c=>c.el.classList.toggle("hit",!!c.hit));show()}
+$("#mon").oninput=mon;
+roles.forEach(r=>{const b=document.createElement("button");b.className="chip"+(r==role?" on":"");b.textContent=r;b.onclick=()=>{role=r;document.querySelectorAll("#rf .chip").forEach(x=>x.classList.toggle("on",x==b));show()};$("#rf").appendChild(b)});
+$("#q").oninput=show;show();
+const TH={ChatGPT:"Best for: drafting, formatting and scheduled tasks.",Claude:"Best for: long documents, files and careful analysis.",Copilot:"Best for: work inside your Outlook, OneDrive and SharePoint.",Perplexity:"Best for: research with linked, checkable sources."};
+const lab=["I am ","Task: ","Context: ","Output: ","Rules: "];
+function pv(){const v=[0,1,2,3,4].map(i=>$("#b"+i).value.trim());
+ const t=v.map((x,i)=>x?(i?lab[i]+x:lab[0]+x.replace(/^i am /i,"")):"").filter(Boolean).join("\n");
+ $("#pv").textContent=t||"Your prompt will appear here as you type.";$("#th").textContent=TH[$("#tool").value];return t}
+document.querySelectorAll("#t2 input,#t2 textarea,#t2 select").forEach(e=>e.oninput=pv);$("#tool").onchange=pv;pv();
+$("#cb").onclick=()=>{const t=pv();if(t)copy(t)};
+const PRE="Write the best possible prompt for this task, using who I am, the task, context, output format and rules: ";
+function gen(){const t=PRE+$("#g").value.trim(),e=encodeURIComponent(t);
+ $("#gc").href="https://chatgpt.com/?q="+e;$("#gp").href="https://www.perplexity.ai/search?q="+e;return t}
+$("#g").oninput=gen;gen();$("#gcl").onclick=()=>copy(gen());
+</script></body></html>
